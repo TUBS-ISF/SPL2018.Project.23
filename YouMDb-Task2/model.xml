@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<featureModel>
+    <properties/>
+    <struct>
+        <and abstract="true" mandatory="true" name="YouMDb">
+            <description>
+Provides basic UI
+</description>
+            <and mandatory="true" name="Base">
+                <description>
+Basic functionality for adding, editing and removing movies (containing name, description, release year and length)
+</description>
+                <alt mandatory="true" name="Database">
+                    <description>
+Handles the persistence of movie entries
+</description>
+                    <feature name="SQLite">
+                        <description>
+File based local database
+</description>
+                    </feature>
+                    <feature abstract="true" name="MySQL">
+                        <description>
+MySQL connector
+</description>
+                    </feature>
+                    <feature abstract="true" name="PostgresSQL">
+                        <description>
+PostgresSQL connector
+</description>
+                    </feature>
+                </alt>
+                <and abstract="true" name="Actors">
+                    <description>
+Possibility to add actors with their roles to movies
+</description>
+                    <feature abstract="true" name="Biographies">
+                        <description>
+Biographies for Actors
+</description>
+                    </feature>
+                </and>
+                <and abstract="true" name="Genres">
+                    <description>
+Add genres to movies
+</description>
+                    <feature abstract="true" name="DefaultGenres">
+                        <description>
+Provides a basic set of genres
+</description>
+                    </feature>
+                </and>
+                <and abstract="true" name="Search">
+                    <description>
+Search for specific movies, based on other features
+</description>
+                    <feature abstract="true" name="Tags">
+                        <description>
+Add Tags to movies for advanced search
+</description>
+                    </feature>
+                </and>
+                <feature name="Posters">
+                    <description>
+Add movie poster to get a more colorful interface
+</description>
+                </feature>
+                <feature abstract="true" name="Soundtracks">
+                    <description>
+Possibility to add a list of soundtracks to a movie
+</description>
+                </feature>
+                <feature abstract="true" name="Watchlists">
+                    <description>
+Possibility to create lists of movies for easy access
+</description>
+                </feature>
+                <feature abstract="true" name="Notes">
+                    <description>
+Possibility to add personal notes on a movie
+</description>
+                </feature>
+                <feature name="Ratings">
+                    <description>
+Add an own rating
+</description>
+                </feature>
+                <and abstract="true" name="IMDB">
+                    <description>
+IMDB api via www.omdbapi.com
+</description>
+                    <feature abstract="true" name="IMDBRatings">
+                        <description>
+See overall rating of other viewers from IMDB
+</description>
+                    </feature>
+                    <feature abstract="true" name="IMDBMovieImport">
+                        <description>
+Import movies from IMDB to own list
+</description>
+                    </feature>
+                </and>
+                <feature abstract="true" name="LocalFiles">
+                    <description>
+Add option to link local files. Could be trailers, soundtracks or the movie itself
+</description>
+                </feature>
+                <feature abstract="true" name="MultipleUsers">
+                    <description>
+Ability to switch between local users (each with own ratings, watchlists and notes)
+</description>
+                </feature>
+            </and>
+        </and>
+    </struct>
+    <constraints>
+        <rule>
+            <imp>
+                <var>IMDB</var>
+                <disj>
+                    <var>IMDBMovieImport</var>
+                    <var>IMDBRatings</var>
+                </disj>
+            </imp>
+        </rule>
+    </constraints>
+    <calculations Auto="true" Constraints="true" Features="true" Redundant="true" Tautology="true"/>
+    <comments/>
+    <featureOrder userDefined="false"/>
+</featureModel>
