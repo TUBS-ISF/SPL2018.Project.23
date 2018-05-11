@@ -32,7 +32,7 @@ public class MovieDatabase {
 	}
 	
 	/**
-	 * Configure the {@see MovieDatabase} before first use.
+	 * Configure the {@link MovieDatabase} before first use.
 	 * @param driver The driver to use
 	 * @param host The host to connect to
 	 * @param port The port to connect to
@@ -68,6 +68,7 @@ public class MovieDatabase {
 	
 	private SessionFactory sessionFactory;
 	private EntityManager em;
+	private StandardServiceRegistry registry;
 	
 	private MovieDatabase() {
 		if (configuration == null)
@@ -76,29 +77,40 @@ public class MovieDatabase {
 		// build new factory from global conf
 		StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder();
 		builder.applySettings(configuration);
-		StandardServiceRegistry registry = builder.build();
+		registry = builder.build();
 		MetadataSources sources = new MetadataSources(registry);
 		sources.addAnnotatedClass(Movie.class);
 		Metadata metadata = sources.getMetadataBuilder().build();
 		sessionFactory = metadata.getSessionFactoryBuilder().build();
 		em = sessionFactory.createEntityManager();
-		//em.close();
-		//StandardServiceRegistryBuilder.destroy(registry);
 	}
 	
+	/**
+	 * Use this before adding, updating or removing any persistent object.
+	 */
 	public void StartTransaction() {
 		em.getTransaction().begin();
 	}
 	
+	/**
+	 * Use this to actually save changes made since {@link #StartTransaction}.
+	 */
 	public void EndTransaction() {
 		em.getTransaction().commit();
 	}
 	
+	/**
+	 * Use this to revert any changes made since {@link #StartTransaction}.
+	 */
 	public void AbortTransaction() {
 		em.getTransaction().rollback();
 	}
 	
 	private static String VERSION_QUERY;
+	
+	/**
+	 * Get the database and version as String.
+	 */
 	public String GetDatabaseVersion() {
 		Session session = null;
 		String result;
@@ -109,6 +121,14 @@ public class MovieDatabase {
 			if (session != null) session.close();
 		}
 		return result;
+	}
+	
+	/**
+	 * Close all connections.
+	 */
+	public void Shutdown() {
+		em.close();
+		StandardServiceRegistryBuilder.destroy(registry);
 	}
 	
 	/**
