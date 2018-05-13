@@ -30,7 +30,7 @@ public class ExtendedList extends ScrolledComposite {
 		gl_contentComposite.verticalSpacing = 2;
 		gl_contentComposite.horizontalSpacing = 2;
 		contentComposite.setLayout(gl_contentComposite);
-		contentComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		contentComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
 		setContent(contentComposite);
 		
@@ -42,18 +42,17 @@ public class ExtendedList extends ScrolledComposite {
 		});
 	}
 	
-	public void ClearItems() {
+	public void clearItems() {
 		for (Control child : contentComposite.getChildren())
 			child.dispose();
 	}
 	
-	public Composite GetContentComposite() {
+	public Composite getContentComposite() {
 		return contentComposite;
 	}
 	
-	public void Refresh() {
-		setMinSize(getParent().getSize()); // TODO BUGFIX for not being painted
-		setMinSize(null);
+	public void refresh() {
 		setMinHeight(contentComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+		contentComposite.layout();
 	}
 }

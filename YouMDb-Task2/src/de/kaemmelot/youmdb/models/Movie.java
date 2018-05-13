@@ -1,19 +1,21 @@
 package de.kaemmelot.youmdb.models;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.GenericGenerator;
-
 @Entity
 @Table(name = "MOVIES")
 public class Movie {
 	@Id
-	@GeneratedValue(generator="increment")
-	@GenericGenerator(name="increment", strategy = "increment")
-	private Integer Id;
+	@GeneratedValue
+	private Long Id;
 	
 	private String name;
 	
@@ -22,11 +24,24 @@ public class Movie {
 	private Integer releaseYear;
 	
 	private Integer length;
+	
+	@ElementCollection
+	private Map<String, MovieAttribute> attributes = new HashMap<String, MovieAttribute>();
+	
+	public Movie() {
+	}
+	
+	public Movie(String name, String desc, Integer releaseYear, Integer length) {
+		this.name = name;
+		this.description = desc;
+		this.releaseYear = releaseYear;
+		this.length = length;
+	}
 
 	/**
 	 * @return the id
 	 */
-	public Integer getId() {
+	public Long getId() {
 		return Id;
 	}
 
@@ -57,13 +72,29 @@ public class Movie {
 	public Integer getLength() {
 		return length;
 	}
+	
+	/**
+	 * Check if movie contains an attribute 
+	 * @param name the attribute name
+	 * @return if the attribute is contained
+	 */
+	public boolean containsAttribute(String name) {
+		return attributes.containsKey(name);
+	}
 
 	/**
-	 * @param id the id to set
-	 * @deprecated should only be used by ORM
+	 * @return the attribute
 	 */
-	public void setId(Integer id) {
-		Id = id;
+	public MovieAttribute getAttribute(String name) {
+		return attributes.get(name);
+	}
+
+	/**
+	 * Get all attributes from this movie
+	 * @return the attributes
+	 */
+	public Collection<MovieAttribute> getAttributes() {
+		return attributes.values();
 	}
 
 	/**
@@ -92,5 +123,20 @@ public class Movie {
 	 */
 	public void setLength(Integer length) {
 		this.length = length;
+	}
+
+	/**
+	 * @param name the name for the attribute
+	 * @param attribute the attribute to set
+	 */
+	public void addAttribute(String name, MovieAttribute attribute) {
+		this.attributes.put(name, attribute);
+	}
+
+	/**
+	 * @param name the name for the attribute
+	 */
+	public void removeAttribute(String name) {
+		this.attributes.remove(name);
 	}
 }

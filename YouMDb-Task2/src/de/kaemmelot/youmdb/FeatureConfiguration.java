@@ -3,20 +3,26 @@ package de.kaemmelot.youmdb;
 public class FeatureConfiguration {
 	private static FeatureConfiguration instance = null;
 	
-	private boolean posters;
+	private final boolean posters;
+	private final boolean ratings;
 	
-	public FeatureConfiguration(boolean posters) {
+	public FeatureConfiguration(boolean posters, boolean ratings) {
 		if (instance != null)
 			throw new IllegalStateException("Cannot create a second FeatureConfiguration");
 		this.posters = posters;
+		this.ratings = ratings;
 		instance = this;
 	}
 	
-	public static FeatureConfiguration GetInstance() {
+	public static FeatureConfiguration getInstance() {
 		return instance;
 	}
 	
-	public boolean UsePosters() {
+	public boolean usePosters() {
 		return posters;
+	}
+	
+	public boolean useRatings() {
+		return ratings;
 	}
 }
