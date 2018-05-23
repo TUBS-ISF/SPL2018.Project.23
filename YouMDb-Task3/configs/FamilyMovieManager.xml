@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+    <feature automatic="selected" name="YouMDb"/>
+    <feature automatic="selected" name="Base"/>
+    <feature automatic="selected" name="Database"/>
+    <feature manual="selected" name="SQLite"/>
+    <feature automatic="unselected" name="MySQL"/>
+    <feature automatic="unselected" name="PostgresSQL"/>
+    <feature automatic="selected" name="Actors"/>
+    <feature manual="selected" name="Biographies"/>
+    <feature automatic="selected" name="Genres"/>
+    <feature manual="selected" name="DefaultGenres"/>
+    <feature automatic="selected" name="Search"/>
+    <feature manual="selected" name="Tags"/>
+    <feature manual="selected" name="Posters"/>
+    <feature manual="selected" name="Ratings"/>
+    <feature automatic="selected" name="IMDB"/>
+    <feature manual="selected" name="IMDBRatings"/>
+    <feature manual="selected" name="LocalFiles"/>
+    <feature manual="selected" name="MultipleUsers"/>
+</configuration>
