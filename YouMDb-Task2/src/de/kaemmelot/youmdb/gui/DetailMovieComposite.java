@@ -9,6 +9,7 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.graphics.Point;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -90,8 +91,9 @@ public class DetailMovieComposite extends ScrolledComposite {
 			if (FeatureConfiguration.getInstance().useRatings())
 				rows++;
 			GridData gd_lblImage = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, rows);
-			gd_lblImage.widthHint = 62;
-			gd_lblImage.heightHint = 90;
+			// This sometimes causes problems with showing the image
+			//gd_lblImage.widthHint = 62;
+			//gd_lblImage.heightHint = 90;
 			lblImage.setLayoutData(gd_lblImage);
 			lblImage.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
 			lblImage.setTopMargin(2);
@@ -100,6 +102,7 @@ public class DetailMovieComposite extends ScrolledComposite {
 			lblImage.setLeftMargin(2);
 			lblImage.setText(null);
 			lblImage.setImage(noImage);
+			lblImage.setSize(new Point(IMAGE_WIDTH, IMAGE_HEIGHT));
 			lblImage.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_ARROW));
 			lblImage.addListener(SWT.MouseDown, new Listener() {
 				public void handleEvent(Event event) {

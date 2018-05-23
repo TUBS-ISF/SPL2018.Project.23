@@ -64,8 +64,9 @@ public class ExtendedListItem extends Composite {
 		if (FeatureConfiguration.getInstance().usePosters()) {
 			lblImage = new CLabel(this, SWT.BORDER | SWT.SHADOW_OUT);
 			GridData lblImageGd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 2);
-			lblImageGd.heightHint = IMAGE_HEIGHT;
-			lblImageGd.widthHint = IMAGE_WIDTH;
+			// This sometimes causes problems with showing the image
+			//lblImageGd.heightHint = IMAGE_HEIGHT;
+			//lblImageGd.widthHint = IMAGE_WIDTH;
 			lblImage.setLayoutData(lblImageGd);
 			lblImage.setTopMargin(2);
 			lblImage.setRightMargin(2);
