@@ -14,6 +14,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 
 import de.kaemmelot.youmdb.MovieDatabase;
@@ -49,7 +51,7 @@ public abstract class YoumdbWindow implements Listener {
 	private static final int WINDOW_HEIGHT = 300;
 	public static final int MENU_HEIGHT = 20;
 	private static final int TAB_HEIGHT = 18;
-	public static final Point CONTENT_MIN_SIZE = new Point(WINDOW_WIDTH, WINDOW_HEIGHT - MENU_HEIGHT - TAB_HEIGHT);
+	public static final Point CONTENT_MIN_SIZE = new Point(WINDOW_WIDTH - 20, WINDOW_HEIGHT - MENU_HEIGHT - TAB_HEIGHT);
 	//#if Posters
 	public static final int IMAGE_HEIGHT = 90;
 	public static final int IMAGE_WIDTH = 62;
@@ -137,8 +139,18 @@ public abstract class YoumdbWindow implements Listener {
 		genrePage = new CTabItem(overviewTabFolder, SWT.NONE);
 		genrePage.setText("Genres");
 		
-		GenreEditList genreEditList = new GenreEditList(overviewTabFolder);
+		final GenreEditList genreEditList = new GenreEditList(overviewTabFolder);
 		genrePage.setControl(genreEditList);
+		overviewTabFolder.addMouseListener(new MouseListener() {
+			public void mouseUp(MouseEvent e) {
+			}
+			public void mouseDown(MouseEvent e) {
+				if (overviewTabFolder.getSelection() == genrePage)
+					genreEditList.updateGenreList();
+			}
+			public void mouseDoubleClick(MouseEvent e) {
+			}
+		});
 		//#else
 //@		overviewTabFolder.setSingle(true);
 		//#endif

@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -16,6 +18,7 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Environment;
 
+import de.kaemmelot.youmdb.models.Genre;
 import de.kaemmelot.youmdb.models.ImageAttribute;
 import de.kaemmelot.youmdb.models.Movie;
 import de.kaemmelot.youmdb.models.MovieAttribute;
@@ -74,6 +77,7 @@ public class MovieDatabase {
 		//#endif
 
 		newConf.put(Environment.HBM2DDL_AUTO, "update");
+		//newConf.put(Environment.SHOW_SQL, "true");
 		
 		configuration = newConf; // save as global conf
 	}
@@ -86,10 +90,12 @@ public class MovieDatabase {
 	 * Register all classes used by this application.
 	 */
 	private void registerClasses(MetadataSources sources) {
+		// keep them here even if the feature isn't enabled
 		sources.addAnnotatedClass(Movie.class);
 		sources.addAnnotatedClass(MovieAttribute.class);
 		sources.addAnnotatedClass(ImageAttribute.class);
 		sources.addAnnotatedClass(RatingAttribute.class);
+		sources.addAnnotatedClass(Genre.class);
 	}
 	
 	private MovieDatabase() {
@@ -218,4 +224,64 @@ public class MovieDatabase {
 			em.refresh(ma);
 		return this;
 	}
+	
+	//#if Genres
+	/**
+	 * Get all genres within the database.
+	 * @return All persistent genres
+	 */
+	public List<Genre> getGenres() {
+		CriteriaQuery<Genre> query = em.getCriteriaBuilder().createQuery(Genre.class);
+		query.select(query.from(Genre.class));
+		return em.createQuery(query).getResultList();
+	}
+	
+	/**
+	 * Get genre by its name.
+	 * @return The genre if found, null otherwise
+	 */
+	public Genre getGenre(String name) {
+		CriteriaQuery<Genre> query = em.getCriteriaBuilder().createQuery(Genre.class);
+		Root<Genre> root = query.from(Genre.class);
+		query.select(root)
+			.where(em.getCriteriaBuilder().equal(root.get("name"), name));
+		try {
+			return em.createQuery(query).getSingleResult();
+		} catch (NoResultException nre) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Add a genre to the database.
+	 * Requires an active transaction!
+	 * @param genre Genre to persist
+	 * @return this
+	 */
+	public MovieDatabase addGenre(Genre genre) {
+		em.persist(genre);
+		return this;
+	}
+	
+	/**
+	 * Remove the genre from the database.
+	 * Requires an active transaction!
+	 * @param genre Genre to remove
+	 * @return this
+	 */
+	public MovieDatabase removeGenre(Genre genre) {
+		em.remove(genre);
+		return this;
+	}
+	
+	/**
+	 * Refresh a genre by overriding all local changes.
+	 * @param genre the genre to refresh
+	 * @return this
+	 */
+	public MovieDatabase refreshGenre(Genre genre) {
+		em.refresh(genre);
+		return this;
+	}
+	//#endif
 }
