@@ -38,33 +38,31 @@ public class DetailMovieComposite extends ScrolledComposite {
 	private final Text txtDesc;
 	private final Text txtYear;
 	private final Text txtLength;
+	//#if Ratings
 	private final Text txtRating;
+	//#endif
+	//#if Posters
 	private final CLabel lblImage;
-	
+
 	private org.eclipse.swt.graphics.Image image;
+	//#endif
+	
 	private Movie currentMovie = null;
 	private boolean editable = false;
 	
+	//#if Posters
 	private final org.eclipse.swt.graphics.Image noImage = SWTResourceManager.getImage(ExtendedListItem.class, "/resources/noImage_small.png");
-	
-	private final static int IMAGE_HEIGHT = 90;
-	private final static int IMAGE_WIDTH = 62;
+	//#endif
 
 	private void addPlaceholder(Composite parent) {
 		(new Label(parent, SWT.NONE)).setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
 	}
 	
 	public DetailMovieComposite(Composite parent, final Shell shell) {
-		super(parent, SWT.NONE);
+		super(parent, SWT.BORDER);
 		setExpandHorizontal(true);
 		setExpandVertical(true);
 		setLayout(new GridLayout());
-		
-		final Listener redrawListener = new Listener() {
-			public void handleEvent(Event event) {
-				redraw();
-			}
-		};
 		
 		Composite content = new Composite(this, SWT.NONE);
 		content.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
@@ -76,7 +74,7 @@ public class DetailMovieComposite extends ScrolledComposite {
 		//#endif
 		content.setLayout(gl);
 		
-		PaintListener editablePaintListener = new PaintListener() { // TODO fix size and selection problems
+		final PaintListener editablePaintListener = new PaintListener() {
 			public void paintControl(PaintEvent e) {
 				e.gc.setAntialias(SWT.ON);
 				e.gc.setForeground(((Text) e.widget).getForeground());
@@ -87,10 +85,11 @@ public class DetailMovieComposite extends ScrolledComposite {
 
 		//#if Posters	
 		lblImage = new CLabel(content, SWT.BORDER | SWT.SHADOW_OUT);
-		int rows = 3;
+		final int rows = 3
 		//#if Ratings
-		rows++;
+		+ 1
 		//#endif
+		;
 		GridData gd_lblImage = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, rows);
 		// This sometimes causes problems with showing the image
 		//gd_lblImage.widthHint = 62;
@@ -103,7 +102,7 @@ public class DetailMovieComposite extends ScrolledComposite {
 		lblImage.setLeftMargin(2);
 		lblImage.setText(null);
 		lblImage.setImage(noImage);
-		lblImage.setSize(new Point(IMAGE_WIDTH, IMAGE_HEIGHT));
+		lblImage.setSize(new Point(YoumdbWindow.IMAGE_WIDTH, YoumdbWindow.IMAGE_HEIGHT));
 		lblImage.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_ARROW));
 		lblImage.addListener(SWT.MouseDown, new Listener() {
 			public void handleEvent(Event event) {
@@ -112,7 +111,7 @@ public class DetailMovieComposite extends ScrolledComposite {
 				
 				FileDialog fd = new FileDialog(shell, SWT.OPEN);
 				fd.setText("Select poster");
-				fd.setFilterExtensions(new String[] {"jpg", "jpeg", "png", "gif"});
+				fd.setFilterExtensions(new String[] {"*.jpg", "*.jpeg", "*.png", "*.gif"});
 				String selected = fd.open();
 				if (selected != null) { // null == cancel
 					try {
@@ -134,8 +133,6 @@ public class DetailMovieComposite extends ScrolledComposite {
 				}
 			}
 		});
-		//#else
-//@		lblImage = null;
 		//#endif
 		// TODO user: delete image?
 		
@@ -159,7 +156,7 @@ public class DetailMovieComposite extends ScrolledComposite {
 		});
 		// https://stackoverflow.com/q/11522774
 		txtName.addPaintListener(editablePaintListener);
-		txtName.addListener(SWT.Gesture | SWT.FocusIn | SWT.FocusOut | SWT.DragDetect | SWT.MouseUp | SWT.Selection, redrawListener);
+		new TextRedrawListener(txtName);
 		
 		addPlaceholder(content);
 		
@@ -202,7 +199,7 @@ public class DetailMovieComposite extends ScrolledComposite {
 		});
 		// https://stackoverflow.com/q/11522774
 		txtYear.addPaintListener(editablePaintListener);
-		txtYear.addListener(SWT.Gesture | SWT.FocusIn | SWT.FocusOut | SWT.DragDetect | SWT.MouseUp | SWT.Selection, redrawListener);
+		new TextRedrawListener(txtYear);
 
 		addPlaceholder(content);
 		
@@ -239,7 +236,7 @@ public class DetailMovieComposite extends ScrolledComposite {
 		});
 		// https://stackoverflow.com/q/11522774
 		txtLength.addPaintListener(editablePaintListener);
-		txtLength.addListener(SWT.Gesture | SWT.FocusIn | SWT.FocusOut | SWT.DragDetect | SWT.MouseUp | SWT.Selection, redrawListener);
+		new TextRedrawListener(txtLength);
 		
 		//#if Ratings
 		addPlaceholder(content);
@@ -281,9 +278,7 @@ public class DetailMovieComposite extends ScrolledComposite {
 		});
 		// https://stackoverflow.com/q/11522774
 		txtRating.addPaintListener(editablePaintListener);
-		txtRating.addListener(SWT.Gesture | SWT.FocusIn | SWT.FocusOut | SWT.DragDetect | SWT.MouseUp | SWT.Selection, redrawListener);
-		//#else
-//@		txtRating = null;
+		new TextRedrawListener(txtRating);
 		//#endif
 		
 		Label lblDesc = new Label(content, SWT.NONE);
@@ -310,7 +305,7 @@ public class DetailMovieComposite extends ScrolledComposite {
 		});
 		// https://stackoverflow.com/q/11522774
 		txtDesc.addPaintListener(editablePaintListener);
-		txtDesc.addListener(SWT.Gesture | SWT.FocusIn | SWT.FocusOut | SWT.DragDetect | SWT.MouseUp | SWT.Selection, redrawListener);
+		new TextRedrawListener(txtDesc);
 
 		setContent(content);
 	}
@@ -326,7 +321,7 @@ public class DetailMovieComposite extends ScrolledComposite {
 				((ImageAttribute) getMovie().getAttribute(ImageAttribute.NAME)).getImage() != null) {
 			newImg = image = new org.eclipse.swt.graphics.Image(getFont().getDevice(),
 					SWTUtils.convertAWTImageToSWT(((ImageAttribute) getMovie().getAttribute(ImageAttribute.NAME)).getImage()
-					.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH)));
+					.getScaledInstance(YoumdbWindow.IMAGE_WIDTH, YoumdbWindow.IMAGE_HEIGHT, Image.SCALE_SMOOTH)));
 		}
 		
 		lblImage.setImage(newImg);

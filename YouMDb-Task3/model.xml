@@ -40,7 +40,7 @@ Biographies for Actors
 </description>
                     </feature>
                 </and>
-                <and abstract="true" name="Genres">
+                <and name="Genres">
                     <description>
 Add genres to movies
 </description>

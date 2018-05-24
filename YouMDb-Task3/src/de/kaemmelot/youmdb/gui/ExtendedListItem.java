@@ -20,14 +20,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.GridData;
 
 public class ExtendedListItem extends Composite {
-	private final static int IMAGE_HEIGHT = 90;
-	private final static int IMAGE_WIDTH = 62;
 	
 	private org.eclipse.swt.graphics.Image itemImage = null;
 	private final Movie movie;
-	private final CLabel lblImage;
 	private final Label lblName;
 	private final Label lblDescription;
+	//#if Posters
+	private final CLabel lblImage;
+	//#endif
 	
 	public ExtendedListItem(ExtendedList parentList, Movie movie) {
 		super(parentList.getContentComposite(), SWT.NONE);
@@ -72,12 +72,10 @@ public class ExtendedListItem extends Composite {
 		lblImage.setRightMargin(2);
 		lblImage.setLeftMargin(2);
 		lblImage.setBottomMargin(2);
-		lblImage.setSize(new Point(IMAGE_WIDTH, IMAGE_HEIGHT));
+		lblImage.setSize(new Point(YoumdbWindow.IMAGE_WIDTH, YoumdbWindow.IMAGE_HEIGHT));
 		lblImage.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
 		lblImage.setText(null);
 		lblImage.addListener(SWT.MouseDown, passThroughListener);
-		//#else
-//@		lblImage = null;
 		//#endif
 		
 		lblName = new Label(this, SWT.NONE);
@@ -107,7 +105,7 @@ public class ExtendedListItem extends Composite {
 		if (movie.containsAttribute(ImageAttribute.NAME)) {
 			itemImage = img = new org.eclipse.swt.graphics.Image(getFont().getDevice(),
 					SWTUtils.convertAWTImageToSWT(((ImageAttribute) movie.getAttribute(ImageAttribute.NAME)).getImage()
-							.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH)));
+							.getScaledInstance(YoumdbWindow.IMAGE_WIDTH, YoumdbWindow.IMAGE_HEIGHT, Image.SCALE_SMOOTH)));
 		} else {
 			itemImage = null;
 			img = SWTResourceManager.getImage(ExtendedListItem.class, "/resources/noImage_small.png");

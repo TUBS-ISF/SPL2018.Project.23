@@ -111,7 +111,7 @@ public class DetailMovieComposite extends ScrolledComposite {
 					
 					FileDialog fd = new FileDialog(shell, SWT.OPEN);
 					fd.setText("Select poster");
-					fd.setFilterExtensions(new String[] {"jpg", "jpeg", "png", "gif"});
+					fd.setFilterExtensions(new String[] {"*.jpg", "*.jpeg", "*.png", "*.gif"});
 					String selected = fd.open();
 					if (selected != null) { // null == cancel
 						try {

@@ -41,11 +41,11 @@ public class MovieDatabase {
 	 */
 	public static void configure(
 			//#if MySQL
-			String host, Integer port,
+//@			String host, Integer port,
 			//#endif
 			String name
 			//#if MySQL
-			, String user, String password
+//@			, String user, String password
 			//#endif
 			) {
 		if (instance != null)
@@ -54,21 +54,21 @@ public class MovieDatabase {
 		// put all settings in a map
 		Map<String, String> newConf = new HashMap<String, String>();
 		//#if SQLite
-//@   		// https://docs.jboss.org/hibernate/orm/5.0/manual/en-US/html/ch03.html
-//@ 		newConf.put(Environment.DRIVER,     "org.sqlite.JDBC");
-//@ 		newConf.put(Environment.DIALECT,    "org.hibernate.dialect.SQLiteDialect");
-//@ 		newConf.put(Environment.URL,        "jdbc:sqlite:" + name);
-//@ 		newConf.put(Environment.AUTOCOMMIT, "true"); // needed, since SQLite would block itself
-//@ 		// host, port, user and password isn't needed
-//@ 		
-//@ 		VERSION_QUERY = "select 'SQLite ' || sqlite_version();";
+   		// https://docs.jboss.org/hibernate/orm/5.0/manual/en-US/html/ch03.html
+ 		newConf.put(Environment.DRIVER,     "org.sqlite.JDBC");
+ 		newConf.put(Environment.DIALECT,    "org.hibernate.dialect.SQLiteDialect");
+ 		newConf.put(Environment.URL,        "jdbc:sqlite:" + name);
+ 		newConf.put(Environment.AUTOCOMMIT, "true"); // needed, since SQLite would block itself
+ 		// host, port, user and password isn't needed
+ 		
+ 		VERSION_QUERY = "select 'SQLite ' || sqlite_version();";
  		//#elif MySQL
-		newConf.put(Environment.URL, "jdbc:mysql://" + host + ':' + port + '/' + name + "?useLegacyDatetimeCode=false&serverTimezone=UTC");
-		newConf.put(Environment.USER, user);
-		if (password != null)
-			newConf.put(Environment.PASS, password);
-		
-		VERSION_QUERY = "select version();";
+//@		newConf.put(Environment.URL, "jdbc:mysql://" + host + ':' + port + '/' + name + "?useLegacyDatetimeCode=false&serverTimezone=UTC");
+//@		newConf.put(Environment.USER, user);
+//@		if (password != null)
+//@			newConf.put(Environment.PASS, password);
+//@		
+//@		VERSION_QUERY = "select version();";
 		//#else
 //@		throw new UnsupportedOperationException("Missing implementation of used driver");
 		//#endif

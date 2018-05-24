@@ -14,7 +14,7 @@ public class ExtendedList extends ScrolledComposite {
 	private final Composite contentComposite;
 
 	public ExtendedList(Composite parent) {
-		super(parent, SWT.V_SCROLL);
+		super(parent, SWT.V_SCROLL | SWT.BORDER);
 		setExpandHorizontal(true);
 		setExpandVertical(true);
 		setLayout(new GridLayout());

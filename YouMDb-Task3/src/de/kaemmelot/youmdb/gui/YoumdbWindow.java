@@ -3,6 +3,7 @@ package de.kaemmelot.youmdb.gui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.wb.swt.SWTResourceManager;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -10,6 +11,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Point;
 
@@ -33,10 +36,24 @@ public abstract class YoumdbWindow implements Listener {
 	private Button btnBackMovie;
 	private Button btnEditMovie;
 	private Button btnDeleteMovie;
+	private Composite movieListBar;
 	private Composite editMovieBar;
 	private Composite detailMovieBar;
-	
-	private static final Point CONTENT_MIN_SIZE = new Point(450, 280);
+	private CTabItem movieOverviewPage;
+	private CTabFolder overviewTabFolder;
+	//#if Genres
+	private CTabItem genrePage;
+	//#endif
+
+	private static final int WINDOW_WIDTH = 450;
+	private static final int WINDOW_HEIGHT = 300;
+	public static final int MENU_HEIGHT = 20;
+	private static final int TAB_HEIGHT = 18;
+	public static final Point CONTENT_MIN_SIZE = new Point(WINDOW_WIDTH, WINDOW_HEIGHT - MENU_HEIGHT - TAB_HEIGHT);
+	//#if Posters
+	public static final int IMAGE_HEIGHT = 90;
+	public static final int IMAGE_WIDTH = 62;
+	//#endif
 
 	/**
 	 * @deprecated THIS IS JUST FOR THE DRAFT. Shouldn't be used except by
@@ -66,7 +83,7 @@ public abstract class YoumdbWindow implements Listener {
 	 */
 	protected void createContents() {
 		shell = new Shell();
-		shell.setMinimumSize(new Point(450, 300));
+		shell.setMinimumSize(new Point(WINDOW_WIDTH, WINDOW_HEIGHT));
 		shell.setText("YouMDb");
 		GridLayout gl_shell = new GridLayout();
 		gl_shell.marginWidth = 0;
@@ -83,25 +100,55 @@ public abstract class YoumdbWindow implements Listener {
 		GridLayout gl_overviewPage = new GridLayout(1, false);
 		gl_overviewPage.marginHeight = 0;
 		gl_overviewPage.marginWidth = 0;
+		gl_overviewPage.verticalSpacing = 0;
 		overviewPage.setLayout(gl_overviewPage);
-
-		movieList = new ExtendedList(overviewPage);
+		
+		overviewTabFolder = new CTabFolder(overviewPage, SWT.BORDER | SWT.FLAT);
+		overviewTabFolder.setTabHeight(TAB_HEIGHT); // this should be the default, but now we can be sure
+		overviewTabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		overviewTabFolder.setSelectionBackground(SWTResourceManager.getColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
+		
+		movieOverviewPage = new CTabItem(overviewTabFolder, SWT.NONE);
+		movieOverviewPage.setText("Movies");
+		
+		Composite movieOverviewComposite = new Composite(overviewTabFolder, SWT.NONE);
+		GridLayout gl_movieOverviewComposite = new GridLayout(1, false);
+		gl_movieOverviewComposite.verticalSpacing = 0;
+		gl_movieOverviewComposite.marginHeight = 0;
+		gl_movieOverviewComposite.marginWidth = 0;
+		movieOverviewComposite.setLayout(gl_movieOverviewComposite);
+		movieOverviewPage.setControl(movieOverviewComposite);
+		
+		movieList = new ExtendedList(movieOverviewComposite);
 		movieList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		movieList.setMinSize(CONTENT_MIN_SIZE);
 
-		Composite movieListBar = new Composite(overviewPage, SWT.NONE);
-		movieListBar.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, false, 1, 1));
+		movieListBar = new Composite(movieOverviewComposite, SWT.NONE);
 		movieListBar.setLayout(new FillLayout(SWT.HORIZONTAL));
+		GridData gdMovieListBar = new GridData(SWT.LEFT, SWT.BOTTOM, true, false, 1, 1);
+		gdMovieListBar.heightHint = MENU_HEIGHT;
+		movieListBar.setLayoutData(gdMovieListBar);
 
 		btnNewMovie = new Button(movieListBar, SWT.NONE);
 		btnNewMovie.setText("New Movie");
 		btnNewMovie.addListener(SWT.MouseDown, this);
+		
+		//#if Genres		
+		genrePage = new CTabItem(overviewTabFolder, SWT.NONE);
+		genrePage.setText("Genres");
+		
+		GenreEditList genreEditList = new GenreEditList(overviewTabFolder);
+		genrePage.setControl(genreEditList);
+		//#else
+//@		overviewTabFolder.setSingle(true);
+		//#endif
 
 		// detail movie page
 		detailMoviePage = new Composite(pages, SWT.NONE);
 		GridLayout gl_editMoviePage = new GridLayout(1, false);
 		gl_editMoviePage.marginHeight = 0;
 		gl_editMoviePage.marginWidth = 0;
+		gl_editMoviePage.verticalSpacing = 0;
 		detailMoviePage.setLayout(gl_editMoviePage);
 		detailMovieComposite = new DetailMovieComposite(detailMoviePage, shell);
 		detailMovieComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
@@ -110,11 +157,11 @@ public abstract class YoumdbWindow implements Listener {
 		// as edit
 		editMovieBar = new Composite(detailMoviePage, SWT.NONE);
 		GridData gdEditBar = new GridData(SWT.LEFT, SWT.BOTTOM, true, false, 1, 1);
-		gdEditBar.heightHint = 25;
+		gdEditBar.heightHint = MENU_HEIGHT;
 		editMovieBar.setLayoutData(gdEditBar);
 		editMovieBar.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-		btnAbortMovie = new Button(editMovieBar, SWT.BORDER);
+		btnAbortMovie = new Button(editMovieBar, SWT.NONE);
 		btnAbortMovie.setText("Abort");
 		btnAbortMovie.addListener(SWT.MouseDown, this);
 
@@ -125,7 +172,7 @@ public abstract class YoumdbWindow implements Listener {
 		// as detail
 		detailMovieBar = new Composite(detailMoviePage, SWT.NONE);
 		GridData gdDetailBar = new GridData(SWT.LEFT, SWT.BOTTOM, true, false, 1, 1);
-		gdDetailBar.heightHint = 25;
+		gdDetailBar.heightHint = MENU_HEIGHT;
 		detailMovieBar.setLayoutData(gdDetailBar);
 		detailMovieBar.setLayout(new FillLayout(SWT.HORIZONTAL));
 
@@ -159,13 +206,19 @@ public abstract class YoumdbWindow implements Listener {
 		movieList.refresh();
 	}
 
-	private void selectDetailPageToolbar(boolean edit) {
-		if (edit) {
+	private void selectToolbar(Composite toolbar) {
+		if (toolbar == editMovieBar) {
 			detailMovieBar.setVisible(false);
+			((GridData) detailMovieBar.getLayoutData()).exclude = true;
 			editMovieBar.setVisible(true);
-		} else {
+			((GridData) editMovieBar.getLayoutData()).exclude = false;
+			detailMovieBar.getParent().pack();
+		} else if (toolbar == detailMovieBar) {
 			detailMovieBar.setVisible(true);
+			((GridData) detailMovieBar.getLayoutData()).exclude = false;
 			editMovieBar.setVisible(false);
+			((GridData) editMovieBar.getLayoutData()).exclude = true;
+			editMovieBar.getParent().pack();
 		}
 	}
 	
@@ -173,12 +226,12 @@ public abstract class YoumdbWindow implements Listener {
 		// on click events
 		if (event.widget instanceof ExtendedListItem) {
 			detailMovieComposite.setMovie(((ExtendedListItem) event.widget).getMovie(), false);
-			selectDetailPageToolbar(false);
+			selectToolbar(detailMovieBar);
 			pagesLayout.topControl = detailMoviePage;
 			pages.layout();
 		} else if (event.widget == btnNewMovie) {
 			detailMovieComposite.setMovie(new Movie("", "", 0, 0), true);
-			selectDetailPageToolbar(true);
+			selectToolbar(editMovieBar);
 			pagesLayout.topControl = detailMoviePage;
 			pages.layout();
 		} else if (event.widget == btnAbortMovie) {
@@ -186,7 +239,7 @@ public abstract class YoumdbWindow implements Listener {
 			if (movie.getId() != null) { // existing movie
 				MovieDatabase.getInstance().abortTransaction().refreshMovie(movie);
 				detailMovieComposite.setMovie(movie, false);
-				selectDetailPageToolbar(false);
+				selectToolbar(detailMovieBar);
 			} else {
 				pagesLayout.topControl = overviewPage;
 				detailMovieComposite.setMovie(null);
@@ -210,7 +263,7 @@ public abstract class YoumdbWindow implements Listener {
 			md.endTransaction()
 				.refreshMovie(movie);
 			detailMovieComposite.setMovie(movie, false); // refresh everything, so we see the current state
-			selectDetailPageToolbar(false);
+			selectToolbar(detailMovieBar);
 			refreshOverview(isNew);
 		} else if (event.widget == btnBackMovie) {
 			pagesLayout.topControl = overviewPage;
@@ -218,7 +271,7 @@ public abstract class YoumdbWindow implements Listener {
 		} else if (event.widget == btnEditMovie) {
 			MovieDatabase.getInstance().startTransaction(); // track changes
 			detailMovieComposite.setEditable(true);
-			selectDetailPageToolbar(true);
+			selectToolbar(editMovieBar);
 			pages.layout();
 		} else if (event.widget == btnDeleteMovie) {
 			// TODO popup
