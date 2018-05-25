@@ -5,6 +5,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.VerifyEvent;
@@ -15,6 +17,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 import javax.imageio.ImageIO;
 
@@ -23,9 +26,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.wb.swt.SWTResourceManager;
 import org.jfree.experimental.swt.SWTUtils;
 
-import de.kaemmelot.youmdb.models.ImageAttribute;
+import de.kaemmelot.youmdb.MovieDatabase;
+import de.kaemmelot.youmdb.models.Genre;
 import de.kaemmelot.youmdb.models.Movie;
-import de.kaemmelot.youmdb.models.RatingAttribute;
 
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Text;
@@ -40,6 +43,10 @@ public class DetailMovieComposite extends ScrolledComposite {
 	private final Text txtLength;
 	//#if Ratings
 	private final Text txtRating;
+	//#endif
+	//#if Genres
+	private final Label lblGenres;
+	private final Label genreList;
 	//#endif
 	//#if Posters
 	private final CLabel lblImage;
@@ -120,11 +127,7 @@ public class DetailMovieComposite extends ScrolledComposite {
 						BufferedImage convImg = new BufferedImage(origImg.getWidth(), origImg.getHeight(), BufferedImage.TYPE_INT_RGB);
 						convImg.createGraphics().drawImage(origImg, 0, 0, null);
 						
-						Movie movie = getMovie();
-						if (movie.containsAttribute(ImageAttribute.NAME))
-							((ImageAttribute) movie.getAttribute(ImageAttribute.NAME)).setImage(convImg);
-						else
-							movie.addAttribute(ImageAttribute.NAME, new ImageAttribute(convImg));
+						getMovie().setImage(convImg);
 						
 						refreshImage();
 					} catch (IOException ioe) {
@@ -267,13 +270,10 @@ public class DetailMovieComposite extends ScrolledComposite {
 		});
 		txtRating.addListener(SWT.FocusOut, new Listener() {
 			public void handleEvent(Event event) {
-				if (!txtRating.getText().isEmpty() && currentMovie.containsAttribute(RatingAttribute.NAME))
-					((RatingAttribute) currentMovie.getAttribute(RatingAttribute.NAME)).setRating(Integer.parseInt(txtRating.getText(), 10));
-				else if (!txtRating.getText().isEmpty() && Integer.parseInt(txtRating.getText(), 10) != 0)
-					currentMovie.addAttribute(RatingAttribute.NAME, new RatingAttribute(Integer.parseInt(txtRating.getText(), 10)));
-				else if ((txtRating.getText().isEmpty() || Integer.parseInt(txtRating.getText(), 10) == 0) &&
-						currentMovie.containsAttribute(RatingAttribute.NAME))
-					((RatingAttribute) currentMovie.getAttribute(RatingAttribute.NAME)).setRating(null);
+				if (!txtRating.getText().isEmpty())
+					currentMovie.setRating(Integer.parseInt(txtRating.getText(), 10));
+				else if ((txtRating.getText().isEmpty() || Integer.parseInt(txtRating.getText(), 10) == 0))
+					currentMovie.setRating(null);
 			}
 		});
 		// https://stackoverflow.com/q/11522774
@@ -281,14 +281,42 @@ public class DetailMovieComposite extends ScrolledComposite {
 		new TextRedrawListener(txtRating);
 		//#endif
 		
+		//#if Genres
+		MouseListener genreListener = new MouseListener() {
+			public void mouseUp(MouseEvent e) {
+			}
+			public void mouseDown(MouseEvent e) {
+				if (editable)
+					openGenreDialog();
+			}
+			public void mouseDoubleClick(MouseEvent e) {
+			}
+		};
+		lblGenres = new Label(content, SWT.NONE);
+		lblGenres.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
+		lblGenres.setText("Genres:");
+		lblGenres.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_ARROW));
+		lblGenres.addMouseListener(genreListener);
+		
+		genreList = new Label(content, SWT.NONE);
+		genreList.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
+		//#if Posters
+		genreList.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false, 3, 1));
+		//#else
+//@		genreList.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false, 2, 1));
+		//#endif
+		genreList.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_ARROW));
+		genreList.addMouseListener(genreListener);
+		//#endif
+				
 		Label lblDesc = new Label(content, SWT.NONE);
 		lblDesc.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
 		lblDesc.setText("Description:");
 		//#if Posters
-		(new Label(content, SWT.NONE)).setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
+		addPlaceholder(content);
 		//#endif
-		(new Label(content, SWT.NONE)).setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
-		(new Label(content, SWT.NONE)).setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
+		addPlaceholder(content);
+		addPlaceholder(content);
 		
 		txtDesc = new Text(content, SWT.WRAP | SWT.MULTI);
 		txtDesc.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
@@ -317,10 +345,9 @@ public class DetailMovieComposite extends ScrolledComposite {
 
 		image = null;
 		org.eclipse.swt.graphics.Image newImg = noImage;
-		if (getMovie() != null && getMovie().containsAttribute(ImageAttribute.NAME) &&
-				((ImageAttribute) getMovie().getAttribute(ImageAttribute.NAME)).getImage() != null) {
+		if (getMovie() != null && getMovie().getImage() != null) {
 			newImg = image = new org.eclipse.swt.graphics.Image(getFont().getDevice(),
-					SWTUtils.convertAWTImageToSWT(((ImageAttribute) getMovie().getAttribute(ImageAttribute.NAME)).getImage()
+					SWTUtils.convertAWTImageToSWT(getMovie().getImage()
 					.getScaledInstance(YoumdbWindow.IMAGE_WIDTH, YoumdbWindow.IMAGE_HEIGHT, Image.SCALE_SMOOTH)));
 		}
 		
@@ -340,6 +367,10 @@ public class DetailMovieComposite extends ScrolledComposite {
 		//#if Posters
 		lblImage.setCursor(SWTResourceManager.getCursor(editable ? SWT.CURSOR_HAND : SWT.CURSOR_ARROW));
 		//#endif
+		//#if Genres
+		lblGenres.setCursor(SWTResourceManager.getCursor(editable ? SWT.CURSOR_HAND : SWT.CURSOR_ARROW));
+		genreList.setCursor(SWTResourceManager.getCursor(editable ? SWT.CURSOR_HAND : SWT.CURSOR_ARROW));
+		//#endif
 	}
 	
 	public void setMovie(Movie movie) {
@@ -354,11 +385,10 @@ public class DetailMovieComposite extends ScrolledComposite {
 			txtYear.setText(movie.getReleaseYear().toString());
 			txtLength.setText(movie.getLength().toString());
 			//#if Ratings
-			if (currentMovie.containsAttribute(RatingAttribute.NAME) &&
-					((RatingAttribute) currentMovie.getAttribute(RatingAttribute.NAME)).getRating() != null)
-				txtRating.setText(((RatingAttribute) currentMovie.getAttribute(RatingAttribute.NAME)).getRating().toString());
-			else
-				txtRating.setText("0");
+			txtRating.setText(currentMovie.getRating() != null ? currentMovie.getRating().toString() : "0");
+			//#endif
+			//#if Genres
+			updateGenres();
 			//#endif
 			setEditable(editable);
 		} else {
@@ -366,13 +396,45 @@ public class DetailMovieComposite extends ScrolledComposite {
 			txtDesc.setText("");
 			txtYear.setText("");
 			txtLength.setText("");
+			//#if Ratings
+			txtRating.setText("");
+			//#endif
+			//#if Genres
+			genreList.setText("");
+			//#endif
 		}
 		//#if Posters
 		refreshImage();
 		//#endif
+		layout();
 	}
 	
 	public Movie getMovie() {
 		return currentMovie;
 	}
+	
+	//#if Genres
+	private void updateGenres() {
+		StringBuilder genres = new StringBuilder();
+		boolean firstGenre = true;
+		for (Genre g : currentMovie.getGenres()) {
+			if (!firstGenre)
+				genres.append(", ");
+			firstGenre = false;
+			genres.append(g.getName());
+		}
+		genreList.setText(genres.toString());
+		genreList.getParent().layout();
+	}
+	
+	private void openGenreDialog() {
+		GenreSelectDialog dialog = new GenreSelectDialog(getShell());
+		Collection<Genre> currentGenres = currentMovie.getGenres();
+		Collection<Genre> dialogResult = dialog.open(MovieDatabase.getInstance().getGenres(), currentGenres);
+		if (!dialogResult.equals(currentGenres)) {
+			currentMovie.replaceGenres(dialogResult);
+			updateGenres();
+		}
+	}
+	//#endif
 }

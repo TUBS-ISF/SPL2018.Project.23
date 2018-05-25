@@ -20,9 +20,7 @@ import org.eclipse.swt.graphics.Point;
 
 import de.kaemmelot.youmdb.MovieDatabase;
 import de.kaemmelot.youmdb.YouMDb;
-import de.kaemmelot.youmdb.models.ImageAttribute;
 import de.kaemmelot.youmdb.models.Movie;
-import de.kaemmelot.youmdb.models.RatingAttribute;
 
 public abstract class YoumdbWindow implements Listener {
 	protected Shell shell;
@@ -224,13 +222,13 @@ public abstract class YoumdbWindow implements Listener {
 			((GridData) detailMovieBar.getLayoutData()).exclude = true;
 			editMovieBar.setVisible(true);
 			((GridData) editMovieBar.getLayoutData()).exclude = false;
-			detailMovieBar.getParent().pack();
+			detailMovieBar.getParent().layout();
 		} else if (toolbar == detailMovieBar) {
 			detailMovieBar.setVisible(true);
 			((GridData) detailMovieBar.getLayoutData()).exclude = false;
 			editMovieBar.setVisible(false);
 			((GridData) editMovieBar.getLayoutData()).exclude = true;
-			editMovieBar.getParent().pack();
+			editMovieBar.getParent().layout();
 		}
 	}
 	
@@ -264,14 +262,6 @@ public abstract class YoumdbWindow implements Listener {
 			if (isNew)
 				md.startTransaction() // start + add didn't happen before, cause it's new
 					.addMovie(movie);
-			//#if Posters
-			if (movie.containsAttribute(ImageAttribute.NAME))
-				md.addMovieAttribute(movie.getAttribute(ImageAttribute.NAME));
-			//#endif
-			//#if Ratings
-			if (movie.containsAttribute(RatingAttribute.NAME))
-				md.addMovieAttribute(movie.getAttribute(RatingAttribute.NAME));
-			//#endif
 			md.endTransaction()
 				.refreshMovie(movie);
 			detailMovieComposite.setMovie(movie, false); // refresh everything, so we see the current state

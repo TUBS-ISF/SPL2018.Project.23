@@ -144,7 +144,7 @@ public class GenreEditList extends Composite implements SelectionListener, Liste
 			MovieDatabase md = MovieDatabase.getInstance();
 			md.startTransaction();
 			md.addGenre(currentGenre);
-			md.endTransaction();
+			md.endTransaction().refreshGenre(currentGenre); // got an id now
 			txtGenreDesc.setEditable(true);
 			txtGenreDesc.setEnabled(true);
 			updateGenreList(currentGenre.getName());
@@ -175,6 +175,20 @@ public class GenreEditList extends Composite implements SelectionListener, Liste
 		genreList.setSelection(selection != null ? Arrays.asList(genreItems).indexOf(selection) : -1);
 		
 		btnDelete.setEnabled(selection != null);
+		
+		txtGenreName.setEditable(selection != null);
+		txtGenreName.setEnabled(selection != null);
+		txtGenreDesc.setEditable(selection != null);
+		txtGenreDesc.setEnabled(selection != null);
+		if (selection != null) {
+			currentGenre = MovieDatabase.getInstance().getGenre(selection);
+			txtGenreName.setText(currentGenre.getName());
+			txtGenreDesc.setText(currentGenre.getDescription());
+		} else {
+			currentGenre = null;
+			txtGenreName.setText("");
+			txtGenreDesc.setText("");
+		}
 	}
 	
 	public void widgetSelected(SelectionEvent e) {
@@ -202,11 +216,14 @@ public class GenreEditList extends Composite implements SelectionListener, Liste
 			currentGenre = null;
 			txtGenreName.setEditable(true);
 			txtGenreDesc.setEditable(false);
+			txtGenreName.setEnabled(true);
 			txtGenreDesc.setEnabled(false);
 			txtGenreName.setText("");
 			txtGenreDesc.setText("");
-			if (!txtGenreName.setFocus())
+			if (!txtGenreName.setFocus()) {
 				txtGenreName.setEditable(false);
+				txtGenreName.setEnabled(false);
+			}
 			btnDelete.setEnabled(false);
 		} else if (event.widget == btnDelete) {
 			txtGenreName.setEditable(false);

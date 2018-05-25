@@ -1,14 +1,22 @@
 package de.kaemmelot.youmdb.models;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.Set;
 
-import javax.persistence.ElementCollection;
+import javax.imageio.ImageIO;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "MOVIES")
@@ -25,8 +33,19 @@ public class Movie {
 	
 	private Integer length;
 	
-	@ElementCollection
-	private Map<String, MovieAttribute> attributes = new HashMap<String, MovieAttribute>();
+	//#if Posters
+	@Type(type = "image")
+	private byte[] image = null;
+	//#endif
+	
+	//#if Ratings
+	private Integer rating = null;
+	//#endif
+	
+	//#if Genres
+	@OneToMany(cascade = CascadeType.ALL)
+	private Set<Genre> genres;
+	//#endif
 	
 	public Movie() {
 	}
@@ -73,30 +92,40 @@ public class Movie {
 		return length;
 	}
 	
+	//#if Posters
 	/**
-	 * Check if movie contains an attribute 
-	 * @param name the attribute name
-	 * @return if the attribute is contained
+	 * @return The poster image as BufferedImage
 	 */
-	public boolean containsAttribute(String name) {
-		return attributes.containsKey(name);
+	public BufferedImage getImage() {
+		if (image == null)
+			return null;
+		try {
+			return ImageIO.read(new ByteArrayInputStream(image));
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
-
+	//#endif
+	
+	//#if Ratings
 	/**
-	 * @return the attribute
+	 * @return the movie rating or null
 	 */
-	public MovieAttribute getAttribute(String name) {
-		return attributes.get(name);
+	public Integer getRating() {
+		return rating;
 	}
+	//#endif
 
+	//#if Genres
 	/**
-	 * Get all attributes from this movie
-	 * @return the attributes
+	 * @return the assigned Genres
 	 */
-	public Collection<MovieAttribute> getAttributes() {
-		return attributes.values();
+	public Set<Genre> getGenres() {
+		return Collections.unmodifiableSet(genres);
 	}
-
+	//#endif
+	
 	/**
 	 * @param name the movie name to set
 	 */
@@ -124,19 +153,59 @@ public class Movie {
 	public void setLength(Integer length) {
 		this.length = length;
 	}
-
+	
+	//#if Posters
 	/**
-	 * @param name the name for the attribute
-	 * @param attribute the attribute to set
+	 * @param image the poster to set, can be null
 	 */
-	public void addAttribute(String name, MovieAttribute attribute) {
-		this.attributes.put(name, attribute);
+	public void setImage(BufferedImage image) {
+		if (image == null) {
+			this.image = null;
+			return;
+		}
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			ImageIO.write(image, "png", baos);
+			baos.flush();
+			this.image = baos.toByteArray(); // TODO somehow this gets really big
+			baos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			this.image = null;
+		}
 	}
-
+	//#endif
+	
+	//#if Ratings
 	/**
-	 * @param name the name for the attribute
+	 * @param rating movie rating or null
 	 */
-	public void removeAttribute(String name) {
-		this.attributes.remove(name);
+	public void setRating(Integer rating) {
+		this.rating = rating;
 	}
+	//#endif
+	
+	//#if Genres
+	/**
+	 * @param genre the Genre to add
+	 */
+	public void addGenre(Genre genre) {
+		genres.add(genre);
+	}
+	
+	/**
+	 * @param genre the Genre to remove
+	 */
+	public void removeGenre(Genre genre) {
+		genres.remove(genre);
+	}
+	
+	/**
+	 * @param genres all genres that should be included after the current are kicked out
+	 */
+	public void replaceGenres(Collection<Genre> genres) {
+		this.genres.clear();
+		this.genres.addAll(genres);
+	}
+	//#endif
 }

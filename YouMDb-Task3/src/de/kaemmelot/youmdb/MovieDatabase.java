@@ -19,10 +19,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Environment;
 
 import de.kaemmelot.youmdb.models.Genre;
-import de.kaemmelot.youmdb.models.ImageAttribute;
 import de.kaemmelot.youmdb.models.Movie;
-import de.kaemmelot.youmdb.models.MovieAttribute;
-import de.kaemmelot.youmdb.models.RatingAttribute;
 
 public class MovieDatabase {
 	private static Map<String, String> configuration = null;
@@ -92,9 +89,6 @@ public class MovieDatabase {
 	private void registerClasses(MetadataSources sources) {
 		// keep them here even if the feature isn't enabled
 		sources.addAnnotatedClass(Movie.class);
-		sources.addAnnotatedClass(MovieAttribute.class);
-		sources.addAnnotatedClass(ImageAttribute.class);
-		sources.addAnnotatedClass(RatingAttribute.class);
 		sources.addAnnotatedClass(Genre.class);
 	}
 	
@@ -203,25 +197,12 @@ public class MovieDatabase {
 	}
 	
 	/**
-	 * Add a {@link MovieAttribute} to the database.
-	 * Requires an active transaction!
-	 * @param movieAttribute {@link MovieAttribute} to persist
-	 * @return this
-	 */
-	public MovieDatabase addMovieAttribute(MovieAttribute movieAttribute) {
-		em.persist(movieAttribute);
-		return this;
-	}
-	
-	/**
 	 * Refresh a movie and all its attributes by overriding all local changes.
 	 * @param movie the movie to refresh
 	 * @return this
 	 */
 	public MovieDatabase refreshMovie(Movie movie) {
 		em.refresh(movie);
-		for (MovieAttribute ma : movie.getAttributes())
-			em.refresh(ma);
 		return this;
 	}
 	

@@ -13,7 +13,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.wb.swt.SWTResourceManager;
 import org.jfree.experimental.swt.SWTUtils;
 
-import de.kaemmelot.youmdb.models.ImageAttribute;
 import de.kaemmelot.youmdb.models.Movie;
 
 import org.eclipse.swt.layout.GridLayout;
@@ -102,9 +101,9 @@ public class ExtendedListItem extends Composite {
 		//#if Posters
 		if (itemImage != null)
 			itemImage.dispose();
-		if (movie.containsAttribute(ImageAttribute.NAME)) {
+		if (movie.getImage() != null) {
 			itemImage = img = new org.eclipse.swt.graphics.Image(getFont().getDevice(),
-					SWTUtils.convertAWTImageToSWT(((ImageAttribute) movie.getAttribute(ImageAttribute.NAME)).getImage()
+					SWTUtils.convertAWTImageToSWT(movie.getImage()
 							.getScaledInstance(YoumdbWindow.IMAGE_WIDTH, YoumdbWindow.IMAGE_HEIGHT, Image.SCALE_SMOOTH)));
 		} else {
 			itemImage = null;
