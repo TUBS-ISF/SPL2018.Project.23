@@ -1,0 +1,2 @@
+### Improvement: Creation of framework sub projects
+It's not intuitive that the sub projects only get created when an appropriate config is selected. I would expect to see all sub projects for all non-abstract features at once. It took me some minutes to figure out why some features did not get their own subproject.
