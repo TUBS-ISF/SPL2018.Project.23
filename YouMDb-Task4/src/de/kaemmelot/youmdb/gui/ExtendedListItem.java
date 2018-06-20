@@ -5,13 +5,11 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 
-import java.awt.Image;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.wb.swt.SWTResourceManager;
-import org.jfree.experimental.swt.SWTUtils;
 
 import de.kaemmelot.youmdb.models.Movie;
 
@@ -19,14 +17,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.GridData;
 
 public class ExtendedListItem extends Composite {
-	
-	private org.eclipse.swt.graphics.Image itemImage = null;
-	private final Movie movie;
+	private Movie movie;
 	private final Label lblName;
 	private final Label lblDescription;
-	//#if Posters
-	private final CLabel lblImage;
-	//#endif
 	
 	public ExtendedListItem(ExtendedList parentList, Movie movie) {
 		super(parentList.getContentComposite(), SWT.NONE);
@@ -34,12 +27,37 @@ public class ExtendedListItem extends Composite {
 		this.movie = movie;
 		
 		setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
-		GridLayout gridLayout;
-		//#if Posters
-		gridLayout = new GridLayout(2, false);
-		//#else
-//@		gridLayout = new GridLayout();
-		//#endif
+		
+		// split plugins to their anchor and count their height and width
+		int leftWidth = 0;
+		int rightWidth = 0;
+		int leftHeight = 0;
+		int rightHeight = 0;
+		List<ExtendedListItemPlugin> leftPlugins = new ArrayList<ExtendedListItemPlugin>();
+		List<ExtendedListItemPlugin> rightPlugins = new ArrayList<ExtendedListItemPlugin>();
+		for (ExtendedListItemPlugin plugin : plugins) {
+			switch (plugin.getExtendedListItemAnchor()) {
+			case Left:
+				leftPlugins.add(plugin);
+				if (plugin.getExtendedListItemWidth() > leftWidth)
+					leftWidth = plugin.getExtendedListItemWidth();
+				if (plugin.getExtendedListItemHeight() > 0)
+					leftHeight += plugin.getExtendedListItemHeight();
+				break;
+			case Right:
+				rightPlugins.add(plugin);
+				if (plugin.getExtendedListItemWidth() > rightWidth)
+					rightWidth = plugin.getExtendedListItemWidth();
+				if (plugin.getExtendedListItemHeight() > 0)
+					rightHeight += plugin.getExtendedListItemHeight();
+				break;
+			default:
+				throw new UnsupportedOperationException("Unknown anchor point");
+			}
+		}
+		final int maxHeight = Math.max(leftHeight, Math.max(2, rightHeight));
+		
+		GridLayout gridLayout = new GridLayout(leftWidth + rightWidth + 1, false);
 		gridLayout.marginWidth = 0;
 		gridLayout.marginHeight = 1;
 		setLayout(gridLayout);
@@ -53,30 +71,9 @@ public class ExtendedListItem extends Composite {
 			}
 		});
 		
-		final ExtendedListItem t = this;
-		final Listener passThroughListener = new Listener() {
-			public void handleEvent(Event event) {
-				t.notifyListeners(event.type, event);
-			}
-		};
-		
-		//#if Posters
-		lblImage = new CLabel(this, SWT.BORDER | SWT.SHADOW_OUT);
-		GridData lblImageGd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 2);
-		// This sometimes causes problems with showing the image
-		//lblImageGd.heightHint = IMAGE_HEIGHT;
-		//lblImageGd.widthHint = IMAGE_WIDTH;
-		lblImage.setLayoutData(lblImageGd);
-		lblImage.setTopMargin(2);
-		lblImage.setRightMargin(2);
-		lblImage.setLeftMargin(2);
-		lblImage.setBottomMargin(2);
-		lblImage.setSize(new Point(YoumdbWindow.IMAGE_WIDTH, YoumdbWindow.IMAGE_HEIGHT));
-		lblImage.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
-		lblImage.setText(null);
-		lblImage.addListener(SWT.MouseDown, passThroughListener);
-		//#endif
-		
+		for (ExtendedListItemPlugin plugin : leftPlugins)
+			plugin.addExtendedListItemContent(maxHeight, this, this);
+				
 		lblName = new Label(this, SWT.NONE);
 		lblName.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 		lblName.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
@@ -88,39 +85,45 @@ public class ExtendedListItem extends Composite {
 		lblDescription.setFont(SWTResourceManager.getFont("Segoe UI", 8, SWT.NORMAL));
 		lblDescription.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
 		lblDescription.addListener(SWT.MouseDown, passThroughListener);
+
+		for (ExtendedListItemPlugin plugin : rightPlugins)
+			plugin.addExtendedListItemContent(maxHeight, this, this);
 		
 		refresh();
+	}
+	
+	final private Listener passThroughListener = new Listener() {
+		public void handleEvent(Event event) {
+			ExtendedListItem.this.notifyListeners(event.type, event);
+		}
+	};
+	
+	public Listener getPassThroughListener() {
+		return passThroughListener;
 	}
 	
 	public Movie getMovie() {
 		return movie;
 	}
 	
-	public void refresh() {
-		org.eclipse.swt.graphics.Image img;
-		//#if Posters
-		if (itemImage != null)
-			itemImage.dispose();
-		if (movie.getImage() != null) {
-			itemImage = img = new org.eclipse.swt.graphics.Image(getFont().getDevice(),
-					SWTUtils.convertAWTImageToSWT(movie.getImage()
-							.getScaledInstance(YoumdbWindow.IMAGE_WIDTH, YoumdbWindow.IMAGE_HEIGHT, Image.SCALE_SMOOTH)));
-		} else {
-			itemImage = null;
-			img = SWTResourceManager.getImage(ExtendedListItem.class, "/resources/noImage_small.png");
-		}
-		lblImage.setImage(img);
-		//#endif
-		
+	public void refresh() {		
 		lblName.setText(movie.getName());
 		lblDescription.setText(movie.getDescription());
+		for (ExtendedListItemPlugin plugin: plugins)
+			plugin.movieChanged(this);
 	}
 	
 	@Override
 	public void dispose() {
+		movie = null;
+		for (ExtendedListItemPlugin plugin: plugins)
+			plugin.movieChanged(this);
 		super.dispose();
-		if (itemImage != null)
-			itemImage.dispose();
 	}
 
+	private static List<ExtendedListItemPlugin> plugins = new ArrayList<ExtendedListItemPlugin>();
+	
+	public static void AddPlugin(ExtendedListItemPlugin plugin) {
+		plugins.add(plugin);
+	}
 }

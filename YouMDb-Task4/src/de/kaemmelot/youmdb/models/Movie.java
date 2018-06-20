@@ -1,14 +1,8 @@
 package de.kaemmelot.youmdb.models;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.imageio.ImageIO;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.MapKeyType;
 import org.hibernate.annotations.Type;
 
 @Entity
@@ -33,19 +28,9 @@ public class Movie {
 	
 	private Integer length;
 	
-	//#if Posters
-	@Type(type = "image")
-	private byte[] image = null;
-	//#endif
-	
-	//#if Ratings
-	private Integer rating = null;
-	//#endif
-	
-	//#if Genres
-	@OneToMany(cascade = CascadeType.ALL)
-	private Set<Genre> genres;
-	//#endif
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = MovieAttribute.class)
+	@MapKeyType(value = @Type(type = "class"))
+	private Map<Class<? extends MovieAttribute>, MovieAttribute> attributes = new HashMap<Class<? extends MovieAttribute>, MovieAttribute>();
 	
 	public Movie() {
 	}
@@ -92,39 +77,14 @@ public class Movie {
 		return length;
 	}
 	
-	//#if Posters
 	/**
-	 * @return The poster image as BufferedImage
+	 * @param cl the attribute class
+	 * @return the attribute or null
 	 */
-	public BufferedImage getImage() {
-		if (image == null)
-			return null;
-		try {
-			return ImageIO.read(new ByteArrayInputStream(image));
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
+	@SuppressWarnings("unchecked")
+	public <T extends MovieAttribute> T getAttribute(Class<T> cl) {
+		return (T) attributes.getOrDefault(cl, null);
 	}
-	//#endif
-	
-	//#if Ratings
-	/**
-	 * @return the movie rating or null
-	 */
-	public Integer getRating() {
-		return rating;
-	}
-	//#endif
-
-	//#if Genres
-	/**
-	 * @return the assigned Genres
-	 */
-	public Set<Genre> getGenres() {
-		return Collections.unmodifiableSet(genres);
-	}
-	//#endif
 	
 	/**
 	 * @param name the movie name to set
@@ -154,58 +114,15 @@ public class Movie {
 		this.length = length;
 	}
 	
-	//#if Posters
 	/**
-	 * @param image the poster to set, can be null
+	 * @param cl the attribute class
+	 * @param ma the attribute
+	 * @return the attribute itself
 	 */
-	public void setImage(BufferedImage image) {
-		if (image == null) {
-			this.image = null;
-			return;
-		}
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
-			ImageIO.write(image, "png", baos);
-			baos.flush();
-			this.image = baos.toByteArray(); // TODO somehow this gets really big
-			baos.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			this.image = null;
-		}
+	public <T extends MovieAttribute> T setAttribute(Class<T> cl, T ma) {
+		if (attributes.containsKey(cl))
+			attributes.remove(cl);
+		attributes.put(cl, ma);
+		return ma;
 	}
-	//#endif
-	
-	//#if Ratings
-	/**
-	 * @param rating movie rating or null
-	 */
-	public void setRating(Integer rating) {
-		this.rating = rating;
-	}
-	//#endif
-	
-	//#if Genres
-	/**
-	 * @param genre the Genre to add
-	 */
-	public void addGenre(Genre genre) {
-		genres.add(genre);
-	}
-	
-	/**
-	 * @param genre the Genre to remove
-	 */
-	public void removeGenre(Genre genre) {
-		genres.remove(genre);
-	}
-	
-	/**
-	 * @param genres all genres that should be included after the current are kicked out
-	 */
-	public void replaceGenres(Collection<Genre> genres) {
-		this.genres.clear();
-		this.genres.addAll(genres);
-	}
-	//#endif
 }

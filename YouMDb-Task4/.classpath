@@ -6,6 +6,13 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" path="features/Posters/src"/>
+	<classpathentry kind="src" path="features/Database/src"/>
+	<classpathentry kind="src" path="features/DefaultGenres/src"/>
+	<classpathentry kind="src" path="features/Genres/src"/>
+	<classpathentry kind="src" path="features/MySQL/src"/>
+	<classpathentry kind="src" path="features/Ratings/src"/>
+	<classpathentry kind="src" path="features/SQLite/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
@@ -22,6 +29,5 @@
 	<classpathentry kind="lib" path="lib/Posters.jar"/>
 	<classpathentry kind="lib" path="lib/Ratings.jar"/>
 	<classpathentry kind="lib" path="lib/SQLite.jar"/>
-	<classpathentry kind="lib" path="lib/YouMDb.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

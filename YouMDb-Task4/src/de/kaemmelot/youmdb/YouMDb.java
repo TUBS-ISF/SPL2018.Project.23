@@ -1,63 +1,25 @@
 package de.kaemmelot.youmdb;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
-
 import de.kaemmelot.youmdb.gui.YoumdbWindow;
+import de.kaemmelot.youmdb.plugins.DatabasePlugin;
+import de.kaemmelot.youmdb.plugins.DefaultGenresPlugin;
+import de.kaemmelot.youmdb.plugins.GenrePlugin;
+import de.kaemmelot.youmdb.plugins.MySQLPlugin;
+import de.kaemmelot.youmdb.plugins.PosterPlugin;
+import de.kaemmelot.youmdb.plugins.RatingPlugin;
+import de.kaemmelot.youmdb.plugins.SQLitePlugin;
 
 public class YouMDb extends YoumdbWindow {
 	
-	//#if MySQL
-//@	@Parameter(names="--host", description="MySQL host. Default: localhost")
-//@	private String host = "localhost";
-//@	
-//@	@Parameter(names="--port", description="MySQL port. Default: 3306")
-//@	private Integer port = 3306;
-//@	
-//@	@Parameter(names={"--database", "-d"}, description="MySQL database name. Default: YouMDb")
-//@	private String database = "YouMDb";
-//@	
-//@	@Parameter(names={"--user", "--username", "-u"}, description="MySQL username for authentication")
-//@	private String user;
-//@	
-//@	@Parameter(names={"--password", "-p"}, description="MySQL password for authentication", password = true)
-//@	private String password;
-	//#elif SQLite
-	@Parameter(names={"--database", "-d"}, description="SQLite database file. Default: ./YouM.db")
-	private String database = "./YouM.db";
-	//#endif
-	
-	@Parameter(names = "--help", help = true)
-	private boolean help;
-	
 	public static void main(String[] args) {
+		loadPlugins(args);
 		YouMDb me = new YouMDb();
-		
-		JCommander com = JCommander.newBuilder()
-			.addObject(me)
-			.build();
-		com.parse(args);
-		
-		//#if MySQL
-//@		if (me.user == null)
-//@			com.usage();
-		//#endif
-		
-		MovieDatabase.configure(
-				//#if MySQL
-//@				me.host, me.port,
-				//#endif
-				//#if MySQL || SQLite
-				me.database
-				//#endif
-				//#if MySQL
-//@				, me.user, me.password
-				//#endif
-				);
-		
 		try {
 			me.startup();
 			me.run();
@@ -65,22 +27,21 @@ public class YouMDb extends YoumdbWindow {
 			me.shutdown();
 		}
 	}
-
-	private MovieDatabase md = null;
 	
 	private void startup() {
-		md = MovieDatabase.getInstance();
-		String version = md.getDatabaseVersion();
-		System.out.printf("Connected to database: %s%n", version);
-		open();
+		for (Plugin p: plugins) {
+			if (p instanceof YouMDbPlugin)
+				((YouMDbPlugin) p).startup();
+		}
+		open(); // init window
 	}
 	
 	private void shutdown() {
-		SWTResourceManager.dispose();
-		if (md != null) {
-			System.out.println("Shutting down database.");
-			md.dispose();
+		for (Plugin p: plugins) {
+			if (p instanceof YouMDbPlugin)
+				((YouMDbPlugin) p).shutdown();
 		}
+		SWTResourceManager.dispose();
 	}
 
 	private void run() {
@@ -91,5 +52,51 @@ public class YouMDb extends YoumdbWindow {
 				display.sleep();
 			}
 		}
+	}
+	
+	private static List<Plugin> plugins = new ArrayList<Plugin>();
+	
+	public static Plugin[] GetPlugins() {
+		return plugins.toArray(new Plugin[plugins.size()]);
+	}
+	
+	@Override
+	protected void addOverviewTabs() {
+		for (Plugin p: plugins)
+			p.registerOverviewTabs(this);
+	}
+	
+	private static void loadPlugins(String[] args) {
+		Plugin p;
+		
+		p = new DatabasePlugin();
+		plugins.add(p);
+		p.registerPlugin(args);
+		
+		/*
+		p = new MySQLPlugin();
+		plugins.add(p);
+		p.registerPlugin(args);
+		*/
+		
+		p = new SQLitePlugin();
+		plugins.add(p);
+		p.registerPlugin(args);
+		
+		p = new PosterPlugin();
+		plugins.add(p);
+		p.registerPlugin(args);
+		
+		p = new RatingPlugin();
+		plugins.add(p);
+		p.registerPlugin(args);
+		
+		p = new GenrePlugin();
+		plugins.add(p);
+		p.registerPlugin(args);
+
+		p = new DefaultGenresPlugin();
+		plugins.add(p);
+		p.registerPlugin(args);
 	}
 }

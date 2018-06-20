@@ -20,7 +20,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-//#if Genres
 public class GenreSelectDialog extends Dialog {
 
 	private List genreList;
@@ -127,4 +126,3 @@ public class GenreSelectDialog extends Dialog {
 		new Label(shell, SWT.NONE); // placeholder
 	}
 }
-//#endif

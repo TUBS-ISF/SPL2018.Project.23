@@ -14,11 +14,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 
-import de.kaemmelot.youmdb.MovieDatabase;
+import de.kaemmelot.youmdb.Database;
 import de.kaemmelot.youmdb.YouMDb;
 import de.kaemmelot.youmdb.models.Movie;
 
@@ -41,19 +39,12 @@ public abstract class YoumdbWindow implements Listener {
 	private Composite detailMovieBar;
 	private CTabItem movieOverviewPage;
 	private CTabFolder overviewTabFolder;
-	//#if Genres
-	private CTabItem genrePage;
-	//#endif
 
 	private static final int WINDOW_WIDTH = 450;
 	private static final int WINDOW_HEIGHT = 300;
 	public static final int MENU_HEIGHT = 20;
 	private static final int TAB_HEIGHT = 18;
 	public static final Point CONTENT_MIN_SIZE = new Point(WINDOW_WIDTH - 20, WINDOW_HEIGHT - MENU_HEIGHT - TAB_HEIGHT);
-	//#if Posters
-	public static final int IMAGE_HEIGHT = 90;
-	public static final int IMAGE_WIDTH = 62;
-	//#endif
 
 	/**
 	 * @deprecated THIS IS JUST FOR THE DRAFT. Shouldn't be used except by
@@ -78,6 +69,8 @@ public abstract class YoumdbWindow implements Listener {
 		shell.layout();
 	}
 
+	protected abstract void addOverviewTabs();
+	
 	/**
 	 * Create contents of the window.
 	 */
@@ -132,27 +125,11 @@ public abstract class YoumdbWindow implements Listener {
 		btnNewMovie = new Button(movieListBar, SWT.NONE);
 		btnNewMovie.setText("New Movie");
 		btnNewMovie.addListener(SWT.MouseDown, this);
-		
-		//#if Genres		
-		genrePage = new CTabItem(overviewTabFolder, SWT.NONE);
-		genrePage.setText("Genres");
-		
-		final GenreEditList genreEditList = new GenreEditList(overviewTabFolder);
-		genrePage.setControl(genreEditList);
-		overviewTabFolder.addMouseListener(new MouseListener() {
-			public void mouseUp(MouseEvent e) {
-			}
-			public void mouseDown(MouseEvent e) {
-				if (overviewTabFolder.getSelection() == genrePage)
-					genreEditList.updateGenreList();
-			}
-			public void mouseDoubleClick(MouseEvent e) {
-			}
-		});
-		//#else
-//@		overviewTabFolder.setSingle(true);
-		//#endif
 
+		addOverviewTabs();
+		if (overviewTabFolder.getItemCount() < 2)
+			overviewTabFolder.setSingle(true);
+		
 		// detail movie page
 		detailMoviePage = new Composite(pages, SWT.NONE);
 		GridLayout gl_editMoviePage = new GridLayout(1, false);
@@ -204,7 +181,7 @@ public abstract class YoumdbWindow implements Listener {
 	private void refreshOverview(boolean clean) {
 		if (clean) {
 			movieList.clearItems();
-			for (Movie m : MovieDatabase.getInstance().getMovies())
+			for (Movie m : Database.getInstance().getAll(Movie.class))
 				new ExtendedListItem(movieList, m)
 					.addListener(SWT.MouseDown, this); // add movie to list and register onClick listener
 		} else {
@@ -247,7 +224,7 @@ public abstract class YoumdbWindow implements Listener {
 		} else if (event.widget == btnAbortMovie) {
 			Movie movie = detailMovieComposite.getMovie();
 			if (movie.getId() != null) { // existing movie
-				MovieDatabase.getInstance().abortTransaction().refreshMovie(movie);
+				Database.getInstance().abortTransaction().refresh(movie);
 				detailMovieComposite.setMovie(movie, false);
 				selectToolbar(detailMovieBar);
 			} else {
@@ -256,14 +233,14 @@ public abstract class YoumdbWindow implements Listener {
 			}
 			pages.layout();
 		} else if (event.widget == btnSaveMovie) {
-			MovieDatabase md = MovieDatabase.getInstance();
+			Database db = Database.getInstance();
 			Movie movie = detailMovieComposite.getMovie();
 			boolean isNew = movie.getId() == null;
 			if (isNew)
-				md.startTransaction() // start + add didn't happen before, cause it's new
-					.addMovie(movie);
-			md.endTransaction()
-				.refreshMovie(movie);
+				db.startTransaction() // start + add didn't happen before, cause it's new
+					.add(movie);
+			db.endTransaction()
+				.refresh(movie);
 			detailMovieComposite.setMovie(movie, false); // refresh everything, so we see the current state
 			selectToolbar(detailMovieBar);
 			refreshOverview(isNew);
@@ -271,7 +248,7 @@ public abstract class YoumdbWindow implements Listener {
 			pagesLayout.topControl = overviewPage;
 			pages.layout();
 		} else if (event.widget == btnEditMovie) {
-			MovieDatabase.getInstance().startTransaction(); // track changes
+			Database.getInstance().startTransaction(); // track changes
 			detailMovieComposite.setEditable(true);
 			selectToolbar(editMovieBar);
 			pages.layout();
@@ -280,5 +257,9 @@ public abstract class YoumdbWindow implements Listener {
 			// TODO delete movie
 		} else
 			throw new UnsupportedOperationException("Unimplemented event for widget: " + event.widget.toString());
+	}
+	
+	public CTabFolder getTabFolder() {
+		return overviewTabFolder;
 	}
 }

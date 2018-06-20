@@ -2,7 +2,7 @@
 <featureModel>
     <properties/>
     <struct>
-        <and mandatory="true" name="YouMDb">
+        <and abstract="true" mandatory="true" name="YouMDb">
             <description>
 Provides basic UI
 </description>

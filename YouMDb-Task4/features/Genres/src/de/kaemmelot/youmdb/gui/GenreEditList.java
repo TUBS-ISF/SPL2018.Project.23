@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import de.kaemmelot.youmdb.MovieDatabase;
+import de.kaemmelot.youmdb.Database;
 import de.kaemmelot.youmdb.models.Genre;
 
 import org.eclipse.swt.widgets.Text;
@@ -29,7 +29,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 
-//#if Genres
 public class GenreEditList extends Composite implements SelectionListener, Listener {
 	private Text txtGenreName;
 	private Text txtGenreDesc;
@@ -107,10 +106,10 @@ public class GenreEditList extends Composite implements SelectionListener, Liste
 		new TextRedrawListener(txtGenreDesc);
 		txtGenreDesc.addFocusListener(new FocusListener() {
 			public void focusLost(FocusEvent e) {
-				MovieDatabase md = MovieDatabase.getInstance();
-				md.startTransaction();
+				Database db = Database.getInstance();
+				db.startTransaction();
 				currentGenre.setDescription(txtGenreDesc.getText());
-				md.endTransaction();
+				db.endTransaction();
 			}
 			public void focusGained(FocusEvent e) {
 			}
@@ -141,10 +140,10 @@ public class GenreEditList extends Composite implements SelectionListener, Liste
 		if (currentGenre == null && txtGenreName.getText().length() > 0) {
 			// create new genre
 			currentGenre = new Genre(txtGenreName.getText());
-			MovieDatabase md = MovieDatabase.getInstance();
-			md.startTransaction();
-			md.addGenre(currentGenre);
-			md.endTransaction().refreshGenre(currentGenre); // got an id now
+			Database db = Database.getInstance();
+			db.startTransaction();
+			db.add(currentGenre);
+			db.endTransaction().refresh(currentGenre); // got an id now
 			txtGenreDesc.setEditable(true);
 			txtGenreDesc.setEnabled(true);
 			updateGenreList(currentGenre.getName());
@@ -153,10 +152,10 @@ public class GenreEditList extends Composite implements SelectionListener, Liste
 			txtGenreName.setEditable(false);
 		} else if (currentGenre != null && txtGenreName.getText().length() > 0) {
 			// edit name
-			MovieDatabase md = MovieDatabase.getInstance();
-			md.startTransaction();
+			Database db = Database.getInstance();
+			db.startTransaction();
 			currentGenre.setName(txtGenreName.getText());
-			md.endTransaction();
+			db.endTransaction();
 			updateGenreList(currentGenre.getName());
 		}
 	}
@@ -166,7 +165,7 @@ public class GenreEditList extends Composite implements SelectionListener, Liste
 	}
 	
 	private void updateGenreList(String selection) {
-		java.util.List<Genre> genres = MovieDatabase.getInstance().getGenres();
+		java.util.List<Genre> genres = Database.getInstance().getAll(Genre.class);
 		String[] genreItems = new String[genres.size()];
 		for (int g = 0; g < genres.size(); g++)
 			genreItems[g] = genres.get(g).getName();
@@ -181,7 +180,7 @@ public class GenreEditList extends Composite implements SelectionListener, Liste
 		txtGenreDesc.setEditable(selection != null);
 		txtGenreDesc.setEnabled(selection != null);
 		if (selection != null) {
-			currentGenre = MovieDatabase.getInstance().getGenre(selection);
+			currentGenre = Database.getInstance().getByName(Genre.class, selection);
 			txtGenreName.setText(currentGenre.getName());
 			txtGenreDesc.setText(currentGenre.getDescription());
 		} else {
@@ -197,7 +196,7 @@ public class GenreEditList extends Composite implements SelectionListener, Liste
 		if (selection == -1)
 			return;
 		
-		currentGenre = MovieDatabase.getInstance().getGenre(genreList.getItem(genreList.getSelectionIndex()));
+		currentGenre = Database.getInstance().getByName(Genre.class, genreList.getItem(genreList.getSelectionIndex()));
 		txtGenreName.setEditable(true);
 		txtGenreName.setEnabled(true);
 		txtGenreDesc.setEditable(true);
@@ -226,20 +225,20 @@ public class GenreEditList extends Composite implements SelectionListener, Liste
 			}
 			btnDelete.setEnabled(false);
 		} else if (event.widget == btnDelete) {
+			// TODO deleting a genre while movies reference it is causing an exception
 			txtGenreName.setEditable(false);
 			txtGenreName.setEnabled(false);
 			txtGenreDesc.setEditable(false);
 			txtGenreDesc.setEnabled(false);
 			txtGenreName.setText("");
 			txtGenreDesc.setText("");
-			MovieDatabase md = MovieDatabase.getInstance();
-			md.startTransaction();
-			md.removeGenre(currentGenre);
-			md.endTransaction();
+			Database db = Database.getInstance();
+			db.startTransaction();
+			db.remove(currentGenre);
+			db.endTransaction();
 			currentGenre = null;
 			updateGenreList(); // selection = -1 & btnDelete.disable
 		} else
 			throw new UnsupportedOperationException("Unimplemented event for widget: " + event.widget.toString());
 	}
 }
-//#endif
