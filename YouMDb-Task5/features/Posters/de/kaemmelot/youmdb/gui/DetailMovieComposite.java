@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Shell;
 public class DetailMovieComposite {
 	private CLabel lblImage;
 
-	private org.eclipse.swt.graphics.Image image;
+	//private org.eclipse.swt.graphics.Image image;
 	private final org.eclipse.swt.graphics.Image noImage = SWTResourceManager.getImage(ExtendedListItem.class, "/resources/noImage_small.png");
 	
 	public static final int IMAGE_HEIGHT = 90;
@@ -106,14 +106,14 @@ public class DetailMovieComposite {
 	}
 	
 	private void movieChanged(Movie movie) {
-		if (image != null) // release old image
-			image.dispose();
+		//if (image != null) // release old image
+		//	image.dispose();
 
-		image = null;
+		//image = null;
 		org.eclipse.swt.graphics.Image newImg = noImage;
 		PosterAttribute pa = movie != null ? movie.getAttribute(PosterAttribute.class) : null;
 		if (pa != null && pa.getImage() != null) {
-			newImg = image = new org.eclipse.swt.graphics.Image(this.getFont().getDevice(),
+			newImg = /*image = */new org.eclipse.swt.graphics.Image(this.getFont().getDevice(),
 					SWTUtils.convertAWTImageToSWT(pa.getImage()
 					.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH)));
 		}

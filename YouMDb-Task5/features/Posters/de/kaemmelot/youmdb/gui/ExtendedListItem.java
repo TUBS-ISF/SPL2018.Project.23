@@ -58,7 +58,7 @@ public class ExtendedListItem extends Composite {
 	protected void movieChanged() {
 		original();
 		
-		org.eclipse.swt.graphics.Image img = lblImage.getImage();
+		//org.eclipse.swt.graphics.Image img = lblImage.getImage();
 		if (this.movie != null) {
 			PosterAttribute pa = this.movie.getAttribute(PosterAttribute.class);
 			if (pa != null && pa.getImage() != null) {
@@ -69,7 +69,7 @@ public class ExtendedListItem extends Composite {
 				lblImage.setImage(SWTResourceManager.getImage(ExtendedListItem.class, "/resources/noImage_small.png"));
 		} else
 			lblImage.dispose();
-		if (img != null)
-			img.dispose();
+		//if (img != null)
+		//	img.dispose();
 	}
 }
