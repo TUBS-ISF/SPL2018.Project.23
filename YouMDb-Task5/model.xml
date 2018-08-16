@@ -24,9 +24,9 @@ File based local database
 MySQL connector
 </description>
                     </feature>
-                    <feature name="PostgresSQL">
+                    <feature name="PostgreSQL">
                         <description>
-PostgresSQL connector
+PostgreSQL connector
 </description>
                     </feature>
                 </alt>
@@ -130,7 +130,7 @@ Ability to switch between local users (each with own ratings, watchlists and not
         <feature name="Base"/>
         <feature name="Database"/>
         <feature name="MySQL"/>
-        <feature name="PostgresSQL"/>
+        <feature name="PostgreSQL"/>
         <feature name="SQLite"/>
         <feature name="Search"/>
         <feature name="Posters"/>

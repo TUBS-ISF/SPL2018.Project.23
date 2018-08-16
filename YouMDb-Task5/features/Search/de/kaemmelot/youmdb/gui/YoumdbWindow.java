@@ -7,7 +7,6 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.widgets.Listener;
 
 import de.kaemmelot.youmdb.Database;
-import de.kaemmelot.youmdb.models.Genre;
 
 public abstract class YoumdbWindow implements Listener {
 	private void addOverviewTabs() {
@@ -21,7 +20,7 @@ public abstract class YoumdbWindow implements Listener {
 			}
 			public void mouseDown(MouseEvent e) {
 				if (getTabFolder().getSelection() == searchPage)
-					searchComposite.updateGenres(Database.getInstance().getAll(Genre.class));
+					searchComposite.updateGenres();
 			}
 			public void mouseDoubleClick(MouseEvent e) {
 			}

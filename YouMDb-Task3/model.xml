@@ -24,9 +24,9 @@ File based local database
 MySQL connector
 </description>
                     </feature>
-                    <feature abstract="true" name="PostgresSQL">
+                    <feature abstract="true" name="PostgreSQL">
                         <description>
-PostgresSQL connector
+PostgreSQL connector
 </description>
                     </feature>
                 </alt>

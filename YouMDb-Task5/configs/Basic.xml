@@ -5,5 +5,5 @@
     <feature automatic="selected" name="Database"/>
     <feature manual="selected" name="SQLite"/>
     <feature automatic="unselected" name="MySQL"/>
-    <feature automatic="unselected" name="PostgresSQL"/>
+    <feature automatic="unselected" name="PostgreSQL"/>
 </configuration>

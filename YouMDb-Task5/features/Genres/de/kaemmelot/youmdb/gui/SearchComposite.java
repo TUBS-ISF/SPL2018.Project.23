@@ -6,7 +6,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.layout.GridData;
@@ -22,7 +21,6 @@ import org.eclipse.swt.widgets.Combo;
 
 public class SearchComposite extends Composite {
 	private Combo genreSelection;
-	private List<Genre> genres;
 	
 	protected int getNumberOfSearchEntries() {
 		return 1 + original();
@@ -43,9 +41,9 @@ public class SearchComposite extends Composite {
 		});
 	}
 	
-	public void updateGenres(List<Genre> genres) {
+	public void updateGenres() {
+		List<Genre> genres = Database.getInstance().getAll(Genre.class);
 		String oldSelection = genreSelection.getItem(genreSelection.getSelectionIndex());
-		this.genres = genres;
 		String[] genreStrings = new String[genres.size() + 1];
 		int s = 0;
 		int select = 0;
@@ -56,7 +54,7 @@ public class SearchComposite extends Composite {
 			genreStrings[s++] = g.getName();
 		}
 		genreSelection.setItems(genreStrings);
-		genreSelection.select(s);
+		genreSelection.select(select);
 	}
 	
 	private List<Movie> search() {

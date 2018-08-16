@@ -81,4 +81,6 @@ public class SearchComposite extends Composite {
 		}
 		return result;
 	}
+	
+	public void updateGenres() {}
 }

@@ -5,7 +5,7 @@
     <feature automatic="selected" name="Database"/>
     <feature manual="selected" name="SQLite"/>
     <feature automatic="unselected" name="MySQL"/>
-    <feature automatic="unselected" name="PostgresSQL"/>
+    <feature automatic="unselected" name="PostgreSQL"/>
     <feature manual="selected" name="Actors"/>
     <feature automatic="selected" name="Genres"/>
     <feature manual="selected" name="DefaultGenres"/>
