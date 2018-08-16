@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+    <feature automatic="selected" name="YouMDb"/>
+    <feature automatic="selected" name="Base"/>
+    <feature automatic="selected" name="Db"/>
+    <feature manual="selected" name="SQLite"/>
+    <feature automatic="unselected" name="MySQL"/>
+    <feature automatic="unselected" name="PostgreSQL"/>
+</configuration>

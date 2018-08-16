@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+    <feature automatic="selected" name="YouMDb"/>
+    <feature automatic="selected" name="Base"/>
+    <feature automatic="selected" name="Db"/>
+    <feature automatic="unselected" name="SQLite"/>
+    <feature manual="selected" name="MySQL"/>
+    <feature automatic="unselected" name="PostgreSQL"/>
+    <feature manual="selected" name="Actors"/>
+    <feature automatic="selected" name="Genres"/>
+    <feature manual="selected" name="DefaultGenres"/>
+    <feature manual="selected" name="Search"/>
+    <feature manual="selected" name="Posters"/>
+    <feature manual="selected" name="Watchlists"/>
+    <feature manual="selected" name="Notes"/>
+    <feature manual="selected" name="Ratings"/>
+    <feature manual="selected" name="LocalFiles"/>
+    <feature manual="selected" name="MultipleUsers"/>
+</configuration>
