@@ -16,6 +16,7 @@ import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Environment;
 
 import de.kaemmelot.youmdb.models.Movie;
 import de.kaemmelot.youmdb.models.MovieAttribute;
@@ -48,6 +49,7 @@ public class Database {
 	private SessionFactory sessionFactory;
 	private EntityManager em;
 	private StandardServiceRegistry registry;
+	private boolean isTransaction = false;
 	
 	private Database() {
 		if (configuration == null)
@@ -76,6 +78,7 @@ public class Database {
 	 */
 	public Database startTransaction() {
 		em.getTransaction().begin();
+		isTransaction = true;
 		return this;
 	}
 	
@@ -85,6 +88,7 @@ public class Database {
 	 */
 	public Database endTransaction() {
 		em.getTransaction().commit();
+		isTransaction = false;
 		return this;
 	}
 	
@@ -94,7 +98,15 @@ public class Database {
 	 */
 	public Database abortTransaction() {
 		em.getTransaction().rollback();
+		isTransaction = false;
 		return this;
+	}
+	
+	/**
+	 * Returns if an transaction is currently running.
+	 */
+	public boolean isWithinTransaction() {
+		return isTransaction;
 	}
 	
 	/**

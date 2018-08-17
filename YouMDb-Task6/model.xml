@@ -30,7 +30,7 @@ PostgreSQL connector
 </description>
                     </feature>
                 </alt>
-                <and abstract="true" name="Actors">
+                <and name="Actors">
                     <description>
 Possibility to add actors with their roles to movies
 </description>
@@ -75,7 +75,7 @@ Possibility to add a list of soundtracks to a movie
 Possibility to create lists of movies for easy access
 </description>
                 </feature>
-                <feature abstract="true" name="Notes">
+                <feature name="Notes">
                     <description>
 Possibility to add personal notes on a movie
 </description>
@@ -137,5 +137,6 @@ Ability to switch between local users (each with own ratings, watchlists and not
         <feature name="Ratings"/>
         <feature name="Genres"/>
         <feature name="DefaultGenres"/>
+        <feature name="Actors"/>
     </featureOrder>
 </featureModel>
